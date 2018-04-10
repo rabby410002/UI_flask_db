@@ -1,0 +1,115 @@
+{% extends "layout2.html" %}
+
+
+{% block content %}
+
+    <p><b><font size="6"> 品牌產品類型趨勢 </font></b></p>
+
+    <script src="/vendor/jquery/jquery.min.js"></script>
+
+	<div id="example-table-simple"></div>
+
+	<div id="example"></div>
+
+	<p id="demo"></p>
+	<style>#chart svg { height: 400px; }</style>
+	<div id="chart"> <svg></svg> </div>
+
+<script>
+$jQ = jQuery.noConflict();
+$jQ.getJSON( "/bp_brand_list", function( data ) {
+	tabledata=data;
+	//alert("data : " + data);
+
+	$("#example-table-simple").tabulator({
+		//height:"500px",
+		fitColumns:true,
+		pagination:true,
+		paginationSize:10,
+		data:tabledata,
+		columns:[
+		{title:"Brands", field:"brand", headerFilter:"input"},
+		{title:"Product Catecory", field:"prod", headerFilter:"input"},
+		{title:"Index", field:"slope"},
+		],
+		rowClick:function(e, id, dt, row){
+		//alert("Row " + tabledata[id]['bid'] + " Clicked!!!!")
+
+			var bid=tabledata[id]['bid']
+
+			$jQ.getJSON( "/bp_trend2/"+bid, function( data ) {
+				chartData.datum(data).transition().duration(500).call(chart);
+				nv.utils.windowResize(chart.update);
+
+			});
+
+		},
+	});
+
+	$(window).resize(function(){
+		$("#example-table-simple").tabulator("redraw");
+	});
+});
+
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script src="http://nvd3.org/assets/js/data/stream_layers.js"></script>
+<script>
+var chart;
+var chartData;
+
+  nv.addGraph(function() {
+	$jQ.getJSON( "/bp_trend2/282", function( data ) {
+  	chart = nv.models.lineWithFocusChart()
+	.x(function(d) {return d3.time.format("%Y-%m-%d").parse(d['date']);})
+	.y(function (d) { return d.value; });
+
+	//alert(data[0]['values'])
+	  chart.xAxis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+	  chart.x2Axis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+
+	  chart.yAxis.tickFormat(d3.format(',.2f'));
+
+	  chart.y2Axis.tickFormat(d3.format(',.2f'));
+
+	  chartData = d3.select('#chart svg').datum(data);
+	  chartData.transition().duration(500).call(chart);
+
+	  nv.utils.windowResize(chart.update);
+
+	});
+	  return chart;
+  });
+
+</script>
+{% endblock %}
+
+
+
+{% block jsblock %}
+	<link rel="stylesheet" href="/jquery-ui.css">
+	<link rel="stylesheet" href="/tabulator.css">
+
+<script type="text/javascript" src="/jquery-ui.min.js"></script>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+
+	<script type="text/javascript" src="/tabulator.js"></script>
+
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+
+
+
+{% endblock %}

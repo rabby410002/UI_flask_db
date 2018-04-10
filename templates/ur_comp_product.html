@@ -1,0 +1,333 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<p><b><font size="6"> 產品類型比較 </font></b></p>
+<p><font size="4"> 選擇單一品牌與多個產品類型進行比較 </font></p><br>
+
+
+<select id="Brand" class="selectpicker" title="Choose One Brand"  data-live-search="true">
+  <optgroup label="Brand" >
+{% for dict_item in brand %}
+    <option>{{dict_item['brand']}}</option>
+{% endfor %}
+  </optgroup>
+</select>
+
+<select id="Products" class="selectpicker" multiple title="Choose Products" data-actions-box="true" data-live-search="true">
+  <optgroup label="Products" > <!-- data-max-options="5" -->
+{% for dict_item in product %}
+    <option >{{dict_item['product']}}</option>
+{% endfor %}
+  </optgroup>
+</select>
+<button id="button">Compare</button>
+<input type ="button" onclick="javascript:location.href='/comp_brand'" value="Change Mode"></input>
+
+
+
+
+
+
+<!--  
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+-->
+
+
+<style>#chart svg { height: 700px; }</style>
+<div id="chart"> <svg></svg> </div>
+<div id="mytimeline">
+  <div id="sub_mytimeline"></div>
+</div>
+
+<div style="height:50px"></div>
+
+<select id="Year" class="selectpicker show-tick" title="Choose year">
+  <optgroup label="Year" >
+    <option value = "0"> 2015~2017 year</option>
+{% for y in range(2015,2018) %}
+    <option value = {{y}}>{{y}} year</option>
+{% endfor %}
+  </optgroup>
+</select>
+
+<style>#chart2 svg { height: 400px; width: 800px; }</style>
+<div id="chart2"> <svg></svg> </div>
+
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script>
+$(document).ready(function(e) {
+	
+	$('.selectpicker').selectpicker(); 
+	
+    $('#button').click(function(){   
+    	$('td').remove();
+    	$('#sub_mytimeline').remove();
+	
+		var prod = $('#Products :selected').map(function(){return $(this).text();}).get();
+		
+		prod = $('#Brand :selected').text() +','+prod		
+		$.getJSON( "/ur_comp_product/"+prod, function( data ) {
+			chartData.datum(data).transition().duration(500).call(chart);
+			nv.utils.windowResize(chart.update);
+		});
+		
+		timeline(prod);
+		
+		prod = $('#Year :selected').val() +','+prod;
+		$.getJSON( "/ur_comp_product2/"+prod, function( data ) {
+			chart2Data.datum(data).transition().duration(350).call(chart2);
+			nv.utils.windowResize(chart2.update);
+    	});
+	});
+	
+});
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script src="http://nvd3.org/assets/js/data/stream_layers.js"></script>
+
+<script>
+var chart;
+var chartData;
+
+  nv.addGraph(function() {
+	$.getJSON( "/ur_comp_product/SK-II,乳液,乳霜", function( data ) {
+  	chart = nv.models.lineWithFocusChart()
+	.x(function(d) {return d3.time.format("%Y-%m-%d").parse(d['dt']);})
+	.y(function (d) { return d.value; });
+
+	//alert(data[0]['values'])
+	  chart.xAxis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+	  chart.x2Axis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+
+	  chart.yAxis.tickFormat(d3.format(',.2f'));
+
+	  chart.y2Axis.tickFormat(d3.format(',.2f'));
+
+	  chartData = d3.select('#chart svg').datum(data);
+	  chartData.transition().duration(500).call(chart);
+
+	  nv.utils.windowResize(chart.update);
+
+	});
+	  return chart;
+  });
+  
+  /**************************************
+   * Simple test data generator
+   **************************************/
+
+  function testData() {
+    return stream_layers(3,128,.1).map(function(data, i) {
+      return { 
+        key: 'Stream' + i,
+        values: data
+      };
+    });
+  }
+
+</script>
+
+
+<script src="http://visjs.org/dist/vis.js"></script>
+<link href="http://visjs.org/dist/vis.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+
+function timeline(prod) {
+	$.getJSON( "/get_comp_product_timeline/"+ prod , function( data ) {
+		  var currentDiv = document.getElementById("mytimeline"); 
+		  var newDiv = document.createElement('div');
+		  newDiv.id = 'sub_mytimeline';
+		  currentDiv.appendChild(newDiv);
+
+		  var container = document.getElementById('sub_mytimeline');
+		  
+		  var value = [];
+		  for (var i = 0; i < data.length; i++) {
+			  var lst = {id: i, content: data[i].prodname, start: data[i].date};
+			  value.push(lst);
+		  }
+		  var items = new vis.DataSet(value);
+
+		  var options = {};
+		  var timeline = new vis.Timeline(container, items, options);
+
+	});
+}
+</script>
+
+<!--  eva modified  -->
+<script>
+$(document).ready(function(e) {
+    $('#Year').change(function(){
+		brand = $('#Brand :selected').text();
+		var prod = $('#Products :selected').map(function(){return $(this).text();}).get();
+		year = $('#Year :selected').val();
+
+		if(brand == "Choose One Brand" || prod == ""){
+			brand = "SK-II";
+			prod = "乳液,乳霜";
+		}
+
+		prod = year + "," + brand + "," + prod;
+		//alert(prod);
+
+		$.getJSON( "/ur_comp_product2/"+prod, function( data ) {
+		chart2Data.datum(data).transition().duration(350).call(chart2);
+		nv.utils.windowResize(chart2.update);
+    		});
+
+
+	});
+	
+});
+</script>
+
+<script type="text/javascript">
+var chart2;
+var chart2Data;
+
+nv.addGraph(function() {
+  $.getJSON( "/ur_comp_product2/0,SK-II,乳液,乳霜", function( data ) {	  
+  chart2 = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chart2Data = d3.select("#chart2 svg").datum(data);
+      chart2Data.transition().duration(350).call(chart2);
+
+      nv.utils.windowResize(chart2.update);
+      chart2.pie.dispatch.on("elementClick", function(e) {
+    	alert(e.data.label);  
+    	$('td').remove();
+  	
+    	
+	    $.getJSON( "/get_content_urcosme/" + e.data.label, function( data ) {
+	    	
+	    	  var tr ;
+	    	  
+	    	  var showChar = 30;
+	  		  var ellipsestext = "...";
+	  	      var moretext = "more";
+	  		  var lesstext = "less";
+	    	  	  		  
+	    	  for (var i = 0; i < data.length; i++) {
+	    	    tr = $('<tr/>');
+	    	    tr.append("<td style='background-color:lavender;' width='400px' >" + data[i].prodname + "</td>");
+	    	    tr.append("<td style='background-color:lavender; 'width='700px' >" + data[i].content + "</td>");
+	    	    tr.append("<td style='background-color:lavender;' width='30px' >" + data[i].age + "</td>");
+	    	    tr.append("<td style='background-color:lavender; 'width='100px' >" + data[i].skin + "</td>");
+	    	    tr.append("<td style='background-color:lavender;' width='250px' >" + data[i].effects + "</td>");
+	    	    tr.append("<td style='background-color:lavender; 'width='20px' >" + data[i].score + "</td>");
+	    	    tr.append("<td style='background-color:lavender; 'width='150px' >" + data[i].date + "</td>");
+	    	    
+	    	    $('table').first().append(tr);	    	    
+	    	  } 
+	    	  
+	    		$('.more').each(function() { 			
+	    			$('td').each(function() {
+	    				var content = $(this).html();
+	    					    				
+	    				if(content.length > showChar) {	
+	    					var c = content.substr(0, showChar);
+	    					var h = content.substr(showChar, content.length - showChar);
+	    					var data = c + '<span class="moreelipses">'+ellipsestext+'</span><span class="morecontent"><span>' + h + '</span>&nbsp;&nbsp;<a href="" class="morelink">'+moretext+'</a></span>';
+	    					$(this).html(data);
+	    				}
+	    			});
+	    		});
+	    	
+	    		$(".morelink").click(function(){
+	    			if($(this).hasClass("less")) {
+	    				$(this).removeClass("less");
+	    				$(this).html(moretext);
+	    			} else {
+	    				$(this).addClass("less");
+	    				$(this).html(lesstext);
+	    			}
+	    			$(this).parent().prev().toggle();
+	    			$(this).prev().toggle();
+	    			return false;
+	    		});
+		});
+      });
+  });
+  return chart2;
+});
+
+</script>
+
+<!--  eva modified end  --> 
+
+
+<!-- avon modified comment review -->
+ 
+<style type="text/css">
+ 
+table.comment {
+	margin: 0px;
+	padding: 5px;
+	background: lightgray;
+	border: solid 1px #fff;
+	
+	width: 1650px;
+	height: 50px;
+	
+	margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+a.morelink {
+	text-decoration:none;
+	outline: none;
+}
+.morecontent span {
+	display: none;
+}
+</style>
+
+<font size="4" face="Courier New" >
+<table class="comment more" border="1" cellpadding=0 cellspacing=0>
+  <tr>
+    <th width='400px'>Product Name</th>
+    <th width='700px'>Content</th>
+    <th width='30px'>Age</th>
+    <th width='100px'>Skin</th>
+    <th width='250px'>Effects</th>
+    <th width='20px'>Score</th>   
+    <th width='150px'>Date</th> 
+  </tr>
+</table>
+</font>
+
+<br><br><br><br>
+<!-- avon modified comment review end -->
+
+{% endblock %}
+
+{% block jsblock %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<p><b><font size="6"> 產品元素預測 </font></b></p>
+
+<select id="Products" class="selectpicker"  title="Choose One Product" data-live-search="true">
+{% for c in element %}
+  <optgroup label= {{c}} > <!-- data-max-options="5" -->
+{% for e in element[c] %}
+    <option >{{e}}</option>
+{% endfor %}
+  </optgroup>
+{% endfor %}
+</select>
+<button id="button">Select</button>
+
+<div id="curve_chart" style="height: 500px"></div>
+
+<div class='container' style="width: 100%;">
+  <div id="mynetwork"></div>
+  <style>#chart svg { height: 400px; }</style>
+  <div id="chart"> <svg></svg> </div>
+</div>
+
+<style type="text/css">
+.container {
+    overflow: hidden;
+}
+#chart {
+    float: right;
+    width: 50%;
+}
+#mynetwork {
+    float: left;
+    width: 50%;
+}
+</style>
+
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script>
+$(document).ready(function(e) {
+	
+	$('.selectpicker').selectpicker(); 
+	
+    $('#button').click(function(){   
+	prod = $('#Products :selected').text()		
+	drawCurveTypes(prod);
+        createNetwork(prod);
+        $.getJSON( "/element_lead_comp/"+prod, function( data ) {
+           chartData.datum(data).transition().duration(500).call(chart);
+	   nv.utils.windowResize(chart.update);
+      	});
+
+    });
+	
+});
+</script>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(element = '大馬士革') {
+	$.getJSON( "/pred_element_st/" + element, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+	        vAxis: {
+        	  title: 'Number of post'
+	        },
+		lineWidth: 2,
+	        series: {
+        	  0: {color: 'red'}
+        	},
+                curveType: 'function'
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart'));
+      	googleline.draw(chartdata, options);
+      	});
+
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script src="http://nvd3.org/assets/js/data/stream_layers.js"></script>
+<script>
+var chart;
+var chartData;
+
+  nv.addGraph(function() {
+	$.getJSON( "/element_lead_comp/大馬士革", function( data ) {
+  	chart = nv.models.lineWithFocusChart()
+	.x(function(d) {return d3.time.format("%Y-%m-%d").parse(d['date']);})
+	.y(function (d) { return d.value; });
+
+	//alert(data[0]['values'])
+	  chart.xAxis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+	  chart.x2Axis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+
+	  chart.yAxis.tickFormat(d3.format(',.2f'));
+
+	  chart.y2Axis.tickFormat(d3.format(',.2f'));
+
+	  chartData = d3.select('#chart svg').datum(data);
+	  chartData.transition().duration(500).call(chart);
+
+	  nv.utils.windowResize(chart.update);
+
+	});
+	  return chart;
+  });
+
+</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+        #mynetwork {
+            width: 50%;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+</style>
+
+<script type="text/javascript">
+createNetwork();
+function createNetwork(element = '大馬士革'){
+  $.getJSON( "/pred_element_leading/" + element, function( data ) {
+    // create an array with nodes
+    var nodes = new vis.DataSet(data['node']);
+
+    // create an array with edges
+    var edges = new vis.DataSet(data['edge']);
+
+    var element = data['element']; 
+    //alert(element) 
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {};
+
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
+
+    network.on("click", function(params){
+       //alert(params.edges);
+       if (params.nodes != ''){
+          //alert(nodes);
+          var element_list = element;
+          element_list.split(',');
+          //alert(element_list);
+          if (element_list.indexOf(params.nodes) == -1){
+              node_id = element + ',' + params.nodes;
+              createNetwork(node_id);
+          }
+       }
+       else{
+ 	     $.getJSON( "/element_lead_comp/"+params.edges, function( data ) {
+		chartData.datum(data).transition().duration(500).call(chart);
+	 	nv.utils.windowResize(chart.update);
+             });
+       }
+    });
+  });
+}
+</script>
+
+
+{% endblock %}
+
+{% block jsblock %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+
+{% endblock %}

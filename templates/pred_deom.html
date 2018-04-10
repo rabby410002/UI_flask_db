@@ -1,0 +1,100 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+    <p><b><font size="6"> 品牌產品類型預測 </font></b></p>
+
+    <script src="/vendor/jquery/jquery.min.js"></script>
+
+	<div id="example-table"></div>
+
+	<div id="example"></div>
+	<div id="spacing" style="height: 20px"></div>
+
+	<div id="curve_chart" style="height: 500px"></div>
+
+<script>
+$jQ = jQuery.noConflict();
+$jQ.getJSON( "/pred_brand_list", function( data ) {
+	tabledata=data;
+	//alert("data : " + data);
+
+	$("#example-table").tabulator({
+		//height:"500px",
+		fitColumns:true,
+		pagination:true,
+		paginationSize:10,
+		data:tabledata,
+		columns:[
+		{title:"Brands", field:"brand", headerFilter:"input"},
+		{title:"Product Catecory", field:"prod", headerFilter:"input"},
+		],
+		rowClick:function(e, id, dt, row){
+		//alert("Row " + tabledata[id]['bid'] + " Clicked!!!!")
+
+			var bid = tabledata[id]['bid']
+			drawCurveTypes(bid);
+		},
+	});
+
+	$(window).resize(function(){
+		$("#example-table-simple").tabulator("redraw");
+	});
+});
+
+</script>
+
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(bid = 1) {
+	$jQ.getJSON( "/pred_trend/" + bid, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+	        vAxis: {
+        	  title: 'Number of post'
+	        },
+		lineWidth: 3,
+	        series: {
+        	  0: {color: 'red'}
+        	}
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart'));
+      	googleline.draw(chartdata, options);
+      	
+	});
+}
+
+</script>
+{% endblock %}
+
+
+{% block jsblock %}
+<link rel="stylesheet" href="/jquery-ui.css">
+<link rel="stylesheet" href="/tabulator.css">
+
+<script type="text/javascript" src="/jquery-ui.min.js"></script>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+<script type="text/javascript" src="/tabulator.js"></script>
+
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+
+
+{% endblock %}
+
+

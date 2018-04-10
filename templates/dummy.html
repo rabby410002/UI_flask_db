@@ -1,0 +1,20 @@
+{% extends "layout2.html" %}
+
+
+{% block content %}
+
+<div>
+<h2>This is a test</h2>
+</div>
+
+<ul>
+{% for i in test %}
+          <li>{{i['name']}}</li>
+
+{% endfor %}
+</ul>
+
+
+{% endblock %}
+
+

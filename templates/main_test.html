@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"> 
+	<title>Brand-Product Analysis</title>
+	<link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="panel panel-primary">
+	<div class="panel-heading">
+	</div>
+	<div class="panel-body">
+		<div>Urcosme 商品使用心得數量</div>
+		<div class="huge" style="font-size: 60px;" > {{ execsql('select count(*) from oneil.urcosme_raw_ts') }}</div>
+		
+	</div>
+	<a href="http://140.96.83.239:7766/urcosme">
+		<div class="panel-footer">
+			<span class="pull-left">/urcosme</span>
+			<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+		<div class="clearfix"></div>
+		</div>
+	</a>
+</div>
+	
+<div class="panel panel-success">
+	<div class="panel-heading">
+	</div>
+	<div class="panel-body">
+		<div>PTT 商品使用心得數量</div>
+		<div class="huge" style="font-size: 60px;" > {{ execsql('select count(*) from oneil.ptt_raw_ts') }}</div>
+		
+	</div>
+	<a href="http://140.96.83.239:7766/ptt">
+		<div class="panel-footer">
+			<span class="pull-left">/ptt</span>
+			<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+		<div class="clearfix"></div>
+		</div>
+	</a>
+	<a href="http://140.96.83.239:7766/pred">
+		<div class="panel-footer">
+			<span class="pull-left">/pred</span>
+			<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+		<div class="clearfix"></div>
+		</div>
+	</a>
+	<a href="http://140.96.83.239:7766/bptrend">
+		<div class="panel-footer">
+			<span class="pull-left">/bptrend</span>
+			<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+		<div class="clearfix"></div>
+		</div>
+	</a>
+</div>
+	
+<div class="panel panel-danger">
+	<div class="panel-heading">
+	</div>
+	<div class="panel-body">
+		<div>Pixnet 商品使用心得數量</div>
+		<div class="huge" style="font-size: 60px;" > {{ execsql('select count(*) from oneil.pixnet_raw_ts') }}</div>
+		
+	</div>
+	<a href="http://140.96.83.239:7766/pixnet_trends">
+		<div class="panel-footer">
+			<span class="pull-left">View Details</span>
+			<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+		<div class="clearfix"></div>
+		</div>
+	</a>
+</div>
+
+
+</body>
+</html>

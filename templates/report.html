@@ -1,0 +1,629 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<p><b><font size="6"> 預警報告 </font></b></p>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="height: 600px; width: 90%; margin: 0 auto"></div>
+
+<style>#chart_age svg { height: 300px; }</style>
+<div id="chart_age" style="width:100%;"> <svg></svg> </div>
+
+<style>#chart_skin svg { height: 300px; }</style>
+<div id="chart_skin" style="width:100%;"> <svg></svg> </div>
+
+<div id="barchart_material" style="width: 90%; height: 280px;"></div>
+
+<style>#chart_age2 svg { height: 300px; }</style>
+<div id="chart_age2" style="width:100%;"> <svg></svg> </div>
+
+<style>#chart_skin2 svg { height: 300px; }</style>
+<div id="chart_skin2" style="width:100%;"> <svg></svg> </div>
+
+<div id="barchart_material2" style="width: 90%; height: 280px;"></div>
+
+<style>#chart_age3 svg { height: 300px; }</style>
+<div id="chart_age3" style="width:100%;"> <svg></svg> </div>
+
+<style>#chart_skin3 svg { height: 300px; }</style>
+<div id="chart_skin3" style="width:100%;"> <svg></svg> </div>
+
+<div id="barchart_material3" style="width: 90%; height: 280px;"></div>
+
+
+<style type="text/css">
+table.comment {
+	margin: 0px;
+	padding: 5px;
+	border: solid 3px #82beff;
+	
+	width: 100%;
+	
+	margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    
+    font-size:18px;
+    text-align:center;
+}
+</style>
+
+<table id="dTable" class="comment more" border="1" cellpadding=0 cellspacing=0>
+  <tr>
+    <th width='20%'>產品</th>
+    <th width='20%'>庫存健檢</th>
+    <th width='20%'>客群-膚質</th>
+    <th width='20%'>客群-年齡</th>
+    <th width='20%'>客群-關注議題</th>
+  </tr>  
+</table>
+<br><br><br><br>
+<p><font size="4"> 斷貨風險示警，建議追加商品數量(爆款商品預測) </font></p>
+<div id="curve_chart_up" style="height: 500px"></div>
+<p><font size="4"> 庫存風險示警，建議去化庫存(退潮商品預測) </font></p>
+<div id="curve_chart_down" style="height: 500px"></div>
+<p><font size="4"> 產品屬性定義/調整建議，建議進口原料產地 </font></p>
+<div id="curve_chart_origin" style="height: 500px"></div>
+<p><font size="4"> 品屬性定義/調整建議，建議加入原料 </font></p>
+<div id="curve_chart_material" style="height: 500px"></div>
+<p><font size="4"> 產品屬性定義/調整建議，建議包裝顏色調整 </font></p>
+<div id="curve_chart_color" style="height: 500px"></div>
+<style type="text/css">
+.highcharts-tooltip h3 {
+    margin: 0.3em 0;
+}
+</style>
+
+<script>
+Highcharts.chart('container', {
+
+    chart: {
+        type: 'bubble',
+        plotBorderWidth: 1,
+        zoomType: 'xy'
+    },
+
+    legend: {
+        enabled: false
+    },
+
+    title: {
+        text: '商品庫存與成長趨勢圖'
+    },
+
+    xAxis: {
+        gridLineWidth: 1,
+        title: {
+            text: '庫存量'
+        },
+        labels: {
+            format: '{value} '
+        },
+        plotLines: [{
+            color: 'red',
+            dashStyle: 'line',
+            width: 2,
+            value: 600,
+            label: {
+                rotation: 0,
+                y: 15,
+                style: {
+                    fontStyle: 'italic'
+                },
+                text: '貨品充足'
+            },
+            zIndex: 3
+        }]
+    },
+
+    yAxis: {
+        startOnTick: false,
+        endOnTick: false,
+        title: {
+            text: '短期成長趨勢'
+        },
+        labels: {
+            format: '{value} %'
+        },
+        maxPadding: 0.2,
+        plotLines: [{
+            color: 'red',
+            dashStyle: 'line',
+            width: 2,
+            value: 1.5,
+            label: {
+                align: 'right',
+                style: {
+                    fontStyle: 'italic'
+                },
+                text: '成長狀態良好',
+                x: -10
+            },
+            zIndex: 3
+        }]
+    },
+
+    tooltip: {
+        useHTML: true,
+        headerFormat: '<table>',
+        pointFormat: '<tr><th colspan="2"><h3>{point.country}</h3></th></tr>' +
+            '<tr><th>庫存數量:</th><td>{point.x}</td></tr>' +
+            '<tr><th>成長趨勢:</th><td>{point.y}%</td></tr>', 
+        footerFormat: '</table>',
+        followPointer: true
+    },
+
+    plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                sizs: 12,
+                format: '{point.name}'
+            }
+        }
+    },
+
+    series: [{
+        data: [
+            { x: 395, y: -9.5, z: 13.8, name: "底妝", country: "BB雙效底妝棒" },
+            { x: 486, y: 1.9, z: 14.7, name: "唇膏", country: "CC持色唇膏" },
+            { x: 580, y: -1.5, z: 15.8, name: "粉底", country: "亮白CC粉底蜜" },
+            { x: 100, y: 5.5, z: 32, name: "腮紅", country: "亮頰透漾腮紅" },
+            { x: 180, y: 6.1, z: 21.8, name: "粉底", country: "保濕CC粉底蜜" },
+            { x: 678, y: -0.1, z: 16.6, name: "精華", country: "保濕CC精華霜" },
+            { x: 474, y: 8.5, z: 14.5, name: "眼妝", country: "太妃糖眼妝" },
+            { x: 673, y: 3.1, z: 10, name: "眼妝", country: "布朗尼眼妝" },
+            { x: 371, y: -3.2, z: 24.7, name: "面膜", country: "持妝深V保濕面膜" },
+            { x: 639, y: 7.6, z: 10.4, name: "眉筆", country: "持色眉筆" },
+            { x: 268, y: 2.0, z: 16, name: "慕斯", country: "洗卸泡泡慕斯" },
+            { x: 665, y: -6.4, z: 35.3, name: "唇筆", country: "漸層唇筆" },
+            { x: 465, y: 0.8, z: 8.5, name: "粉餅", country: "玻尿酸+保濕粉餅" },
+            { x: 663, y: -1.8, z: 15.4, name: "蜜粉", country: "玻尿酸礦物+保濕蜜粉" },
+            { x: 864, y: -2.9, z: 31.3, name: "精華", country: "眼部隔離精華" }
+        ]
+    }]
+
+});
+</script>
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+google.charts.load('current', {'packages':['bar']});
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart() {
+	
+	$.getJSON( "/topic_count/27193", function( data ) {
+				
+	  var data = google.visualization.arrayToDataTable(data);
+	  console.log(data) 
+
+	  var options = {
+	    bars: 'horizontal', // Required for Material Bar Charts.
+	    vAxis:{textStyle:{fontSize:18}},
+	    hAxis:{textStyle:{fontSize:18}},
+	  };
+	
+	  var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+	  chart.draw(data, google.charts.Bar.convertOptions(options));
+	  
+	});  
+}
+
+
+</script>
+
+<script type="text/javascript">
+google.charts.load('current', {'packages':['bar']});
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart() {
+	
+	$.getJSON( "/topic_count/2719", function( data ) {
+				
+	  var data = google.visualization.arrayToDataTable(data);
+	  console.log(data) 
+
+	  var options = {
+	    bars: 'horizontal', // Required for Material Bar Charts.
+	    vAxis:{textStyle:{fontSize:18}},
+	    hAxis:{textStyle:{fontSize:18}},
+	  };
+	
+	  var chart = new google.charts.Bar(document.getElementById('barchart_material2'));
+	  chart.draw(data, google.charts.Bar.convertOptions(options));
+	  
+	});  
+}
+
+
+</script>
+
+<script type="text/javascript">
+google.charts.load('current', {'packages':['bar']});
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart() {
+	
+	$.getJSON( "/topic_count/27191", function( data ) {
+				
+	  var data = google.visualization.arrayToDataTable(data);
+	  console.log(data) 
+
+	  var options = {
+	    bars: 'horizontal', // Required for Material Bar Charts.
+	    vAxis:{textStyle:{fontSize:18}},
+	    hAxis:{textStyle:{fontSize:18}},
+	  };
+	
+	  var chart = new google.charts.Bar(document.getElementById('barchart_material3'));
+	  chart.draw(data, google.charts.Bar.convertOptions(options));
+	  
+	});  
+}
+
+
+</script>
+
+<link rel="stylesheet" href="/jquery-ui.css">
+
+<script type="text/javascript" src="/jquery-ui.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script src="http://nvd3.org/assets/js/data/stream_layers.js"></script>
+<script type="text/javascript">
+var chart;
+var chartData;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_skin/31226", function( data ) {
+  chart = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chartData = d3.select("#chart_skin svg").datum(data);
+      chartData.transition().duration(350).call(chart);
+
+      nv.utils.windowResize(chart.update);
+
+  });
+  return chart;
+});
+
+</script>
+
+<script type="text/javascript">
+var chart;
+var chartData;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_skin/1792", function( data ) {
+  chart = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chartData = d3.select("#chart_skin2 svg").datum(data);
+      chartData.transition().duration(350).call(chart);
+
+      nv.utils.windowResize(chart.update);
+
+  });
+  return chart;
+});
+
+</script>
+
+<script type="text/javascript">
+var chart;
+var chartData;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_skin/1803", function( data ) {
+  chart = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chartData = d3.select("#chart_skin3 svg").datum(data);
+      chartData.transition().duration(350).call(chart);
+
+      nv.utils.windowResize(chart.update);
+
+  });
+  return chart;
+});
+
+</script>
+
+<script type="text/javascript">
+var chart2;
+var chart2Data;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_age/31226", function( data ) {
+  chart2 = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chart2Data = d3.select("#chart_age svg").datum(data);
+      chart2Data.transition().duration(350).call(chart2);
+
+      nv.utils.windowResize(chart2.update);
+  });
+  return chart2;
+});
+
+</script>
+
+<script type="text/javascript">
+var chart2;
+var chart2Data;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_age/4974", function( data ) {
+  chart2 = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chart2Data = d3.select("#chart_age2 svg").datum(data);
+      chart2Data.transition().duration(350).call(chart2);
+
+      nv.utils.windowResize(chart2.update);
+  });
+  return chart2;
+});
+
+</script>
+
+<script type="text/javascript">
+var chart2;
+var chart2Data;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_age/27193", function( data ) {
+  chart2 = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chart2Data = d3.select("#chart_age3 svg").datum(data);
+      chart2Data.transition().duration(350).call(chart2);
+
+      nv.utils.windowResize(chart2.update);
+  });
+  return chart2;
+});
+
+</script>
+
+
+<script type="text/javascript">
+drawreport(1)
+drawreport(2)
+drawreport(3)
+function drawreport(no) {
+    var table = document.getElementById("dTable");
+    var num = document.getElementById("dTable").rows.length;
+    var row = table.insertRow(num);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+    var cell5 = row.insertCell(4);
+
+    if (no == 1){
+      cell3.append(document.getElementById('chart_skin'));
+      cell4.append(document.getElementById('chart_age'));
+      cell5.append(document.getElementById('barchart_material'));
+      cell2.append("產品成長率高(5.5%)，而庫存量低(剩餘100)，建議增加庫存量達到800");
+      cell1.append("亮頰透漾腮紅");
+   }
+   else if (no == 2){
+      cell3.append(document.getElementById('chart_skin2'));
+      cell4.append(document.getElementById('chart_age2'));
+      cell5.append(document.getElementById('barchart_material2'));
+      cell2.append("產品成長率高(6.1%)，而庫存量低(剩餘180)，建議增加庫存量達到600");
+      cell1.append("保濕CC粉底蜜");
+   }
+   else if (no == 3){
+      cell3.append(document.getElementById('chart_skin3'));
+      cell4.append(document.getElementById('chart_age3'));
+      cell5.append(document.getElementById('barchart_material3'));
+      cell2.append("產品成長率低(-2.9%)，而庫存量較多(864)，建議增加促銷活動");
+      cell1.append("眼部隔離精華");
+   }
+
+}
+</script>
+
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(element = '修片餅\+1028,2016-9-27') {
+	$.getJSON( "/pred_google_report/" + element, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+		lineWidth: 2,
+	        series: {
+        	  0: {color: 'red'}
+        	},
+                curveType: 'function'
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart_up'));
+      	googleline.draw(chartdata, options);
+      	});
+
+}
+</script>
+
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(element = '柔礦BB隔離乳+1028,2017-4-13') {
+	$.getJSON( "/pred_google_report/" + element, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+		lineWidth: 2,
+	        series: {
+        	  0: {color: 'red'}
+        	},
+                curveType: 'function'
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart_down'));
+      	googleline.draw(chartdata, options);
+      	});
+
+}
+</script>
+
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(element = '大馬士革,2017-07-02') {
+	$.getJSON( "/pred_element_report/" + element, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+		lineWidth: 2,
+	        series: {
+        	  0: {color: 'red'}
+        	},
+                curveType: 'function'
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart_origin'));
+      	googleline.draw(chartdata, options);
+      	});
+
+}
+</script>
+
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(element = '紅酒,2017-06-04') {
+	$.getJSON( "/pred_element_report/" + element, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+		lineWidth: 2,
+	        series: {
+        	  0: {color: 'red'}
+        	},
+                curveType: 'function'
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart_material'));
+      	googleline.draw(chartdata, options);
+      	});
+
+}
+</script>
+
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(element = '馬卡龍,2017-06-18') {
+	$.getJSON( "/pred_element_report/" + element, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+		lineWidth: 2,
+	        series: {
+        	  0: {color: 'red'}
+        	},
+                curveType: 'function'
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart_color'));
+      	googleline.draw(chartdata, options);
+      	});
+
+}
+</script>
+
+
+	
+{% endblock %}
+
+{% block jsblock %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+
+{% endblock %}

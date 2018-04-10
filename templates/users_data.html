@@ -1,0 +1,135 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<p><b><font size="6"> 產品客群 </font></b></p>
+
+<select id="Products" class="selectpicker"  title="Choose One Product" data-live-search="true">
+  <optgroup label="Products" > <!-- data-max-options="5" -->
+{% for id in prodid %}
+    <option >{{id}}</option>
+{% endfor %}
+  </optgroup>
+</select>
+<button id="button">Select</button>
+
+<div class='container' style="width:100%;">
+<style>#chart_age svg { height: 400px; }</style>
+<div id="chart_age" style="width:50%;"> <svg></svg> </div>
+
+<style>#chart_skin svg { height: 400px; }</style>
+<div id="chart_skin" style="width:50%;"> <svg></svg> </div>
+</div>
+
+<style type="text/css">
+.container {
+    overflow: hidden;
+}
+#chart_skin {
+    float: right;
+    width: 100px;
+}
+#chart_age {
+    float: left;
+    width: 100px;
+}
+.middle {
+    margin: 0 100px;
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script src="http://nvd3.org/assets/js/data/stream_layers.js"></script>
+
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script>
+$(document).ready(function(e) {
+	
+	$('.selectpicker').selectpicker(); 
+	
+    $('#button').click(function(){   
+	prod = $('#Products :selected').text()		
+	$.getJSON( "/user_age/"+prod, function( data ) {
+		chart2Data.datum(data).transition().duration(350).call(chart2);
+		nv.utils.windowResize(chart2.update);
+    	});
+	$.getJSON( "/user_skin/"+prod, function( data ) {
+		chartData.datum(data).transition().duration(350).call(chart);
+		nv.utils.windowResize(chart.update);
+    	});
+	
+	});
+	
+});
+</script>
+
+<!--  eva modified  -->
+<script type="text/javascript">
+var chart;
+var chartData;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_skin/31226", function( data ) {
+  chart = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chartData = d3.select("#chart_skin svg").datum(data);
+      chartData.transition().duration(350).call(chart);
+
+      nv.utils.windowResize(chart.update);
+  });
+  return chart;
+});
+
+</script>
+
+<script type="text/javascript">
+var chart2;
+var chart2Data;
+
+nv.addGraph(function() {
+  $.getJSON( "/user_age/31226", function( data ) {
+  chart2 = nv.models.pieChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      .showLabels(true)     //Display pie labels
+      .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+      .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+      .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+      .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+      ;
+
+      chart2Data = d3.select("#chart_age svg").datum(data);
+      chart2Data.transition().duration(350).call(chart2);
+
+      nv.utils.windowResize(chart2.update);
+  });
+  return chart2;
+});
+
+</script>
+<!--  eva modified end  --> 
+	
+{% endblock %}
+
+{% block jsblock %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+
+{% endblock %}

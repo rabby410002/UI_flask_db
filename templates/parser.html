@@ -1,0 +1,140 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<p><b><font size="6"> 品牌產品類別預警</font></b></p>
+<p><font size="4"> 選擇需要預警之品牌產品類別</font></p><br>
+
+<select id="Brand" class="selectpicker" multiple title="Choose Brands"  data-actions-box="true"  data-live-search="true">
+  <optgroup label="Brand" >
+{% for dict_item in brand %}
+    <option>{{dict_item['brand']}}</option>
+{% endfor %}
+  </optgroup>
+</select>
+
+<select id="Products" class="selectpicker" multiple title="Choose One Product" data-live-search="true">
+  <optgroup label="Products" > <!-- data-max-options="5" -->
+{% for dict_item in product %}
+    <option >{{dict_item['product']}}</option>
+{% endfor %}
+  </optgroup>
+</select>
+  alert threshold:
+  <input type='text' id='threshold' value = '0.5'/>
+<button id="button">Select</button>
+
+<div style="height:50px"></div>
+
+<style type="text/css">
+ 
+table.comment {
+	margin: 0px;
+	padding: 5px;
+	background: lightgray;
+	border: solid 1px #fff;
+	
+	width: 100%;
+	height: 50px;
+	
+	margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pointerDown{
+width: 0;
+height: 0;
+border-style: solid;
+border-width: 21.7px 12.5px 0 12.5px;
+border-color: #ff0000 transparent transparent transparent;
+}
+
+.pointerUp{
+width: 0;
+height: 0;
+border-style: solid;
+border-width: 0 12.5px 21.7px 12.5px;
+border-color: transparent transparent #00ff00 transparent;
+}
+
+.container {
+    overflow: hidden;
+    width: 100%;
+}
+.right {
+    float: right;
+}
+.left {
+    float: left;
+}
+</style>
+
+<font size="4" face="Courier New" >
+<table class="comment more" border="1" cellpadding=0 cellspacing=0>
+  <tr>
+    <th width= 20%>品牌商標</th>
+    <th width= 25%>品牌名稱</th>
+    <th width= 25%>產品類別</th>
+    <th width= 15%>狀態</th>
+    <th width= 15%>預測連結</th>
+  </tr>
+</table>
+</font>
+
+<br><br><br><br>
+
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script>
+$(document).ready(function(e) {
+    $('.selectpicker').selectpicker(); 	
+    $('#button').click(function(){   
+        $('td').remove();
+
+	var brand = $('#Brand :selected').map(function(){return $(this).text();}).get();
+	var prod = $('#Products :selected').map(function(){return $(this).text();}).get();
+	var threshold_element = document.getElementById('threshold');
+	var threshold = threshold_element.value;
+        //alert('brand' + brand + '\nprod' + prod + '\nthreshold' + threshold);
+	var table_list = brand + ';' + prod + ';' + threshold
+
+        $.getJSON( "/get_alert_table/" + table_list, function( data ) {	    	
+	    var tr ;
+            var alert_str='';
+	    	  	  		  
+	    	  for (var i = 0; i < data.length; i++) {
+	    	    tr = $('<tr/>');
+	    	    tr.append("<td style='background-color:lavender;' width= 20% ><img src='" + data[i].img + "' width= 100% height='100'></td>");
+	    	    tr.append("<td style='background-color:lavender;' width= 25% >" + data[i].brand + "</td>");
+	    	    tr.append("<td style='background-color:lavender; 'width= 25% >" + data[i].prod + "</td>");
+                    if(data[i].priority == 1){
+     	              tr.append("<td style='background-color:lavender;' width= 15% ><div class='container'><div class='left'><font color='red'><strong>" + data[i].slope + "</strong></font></div><div class='right'><div class = 'pointerDown'></div></div></td>");
+                      alert_str += data[i].brand + "X" + data[i].prod + ","
+                    }
+                    else if(data[i].priority == 2){
+     	              tr.append("<td style='background-color:lavender;' width= 15% ><div class='container'><div class='left'><font color='green'><strong>" + data[i].slope + "</strong></font></div><div class='right'><div class = 'pointerUp'></div></div></td>");
+                    }
+                    else if(data[i].priority == 3){
+     	              tr.append("<td style='background-color:lavender;' width= 15% >" + data[i].slope + "</td>");
+                    }
+	    	    tr.append("<td style='background-color:lavender; 'width= 15% ><a href = 'http://140.96.83.239:7766/pred_alert/" + data[i].id + "'> link to predction page </a></td>");
+	    	    $('table').first().append(tr);	    	    
+	    	  }
+
+            alert(alert_str + "短期成長趨勢下降幅度超過threshold!!");
+	});
+      });
+});
+</script>
+
+{% endblock %}
+
+{% block jsblock %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+
+{% endblock %}

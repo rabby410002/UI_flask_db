@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard Starter UI, by Keen IO</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+  <link rel="stylesheet" type="text/css" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="/css/keen-dashboards.css" />
+  <link rel="stylesheet" type="text/css" href="/vendor/font-awesome/css/font-awesome.min.css" />
+  <link rel="stylesheet" type="text/css" href="/jared.css" />
+
+</head>
+<body class="application">
+
+  <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../">
+          <span class="glyphicon glyphicon-chevron-left"></span>
+        </a>
+        <a class="navbar-brand" href="./">ITRI 商品趨勢預測技術</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-left">
+          <li><a href="https://keen.io">Home</a></li>
+          <li><a href="https://keen.io/team">Team</a></li>
+          <li><a href="https://github.com/keenlabs/dashboards/tree/gh-pages/examples/starter-kit">Source</a></li>
+          <li><a href="https://groups.google.com/forum/#!forum/keen-io-devs">Community</a></li><li><a href="http://stackoverflow.com/questions/tagged/keen-io?sort=newest&pageSize=15">Technical Support</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+
+    <div class="row">
+      <div class="col-sm-3">
+<div class="panel panel-green" >
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-comments fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge" style="font-size: 40px;" > {{ execsql('select count(*) from urcosme_reviews') }}</div>
+                                    <div>商品使用心得</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+
+      </div>
+      <div class="col-sm-3">
+
+
+<div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-user fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge" style="font-size: 40px;" > {{ execsql('select count(*) from urcosme_users') }}</div>
+                                    <div>使用者</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+
+        </div>
+
+      <div class="col-sm-3">
+<div class="panel panel-red" >
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-industry fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge" style="font-size: 40px;" > {{ execsql('select count(*) from urcosme_brands') }}</div>
+                                    <div>品牌</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+
+      </div>
+      <div class="col-sm-3">
+<div class="panel panel-yellow" >
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-support fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge" style="font-size: 40px;" > {{ execsql('select count(*) from urcosme_prods') }}</div>
+                                    <div>產品</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="#">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+
+      </div>
+    </div>
+
+
+
+
+    <div class="row">
+
+      <div class="col-sm-8">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            Pageviews by browser (past 24 hours)
+          </div>
+          <div class="chart-stage">
+<!--              <div id="chart-01"></div> -->
+<iframe
+  width="600"
+  height="400"
+  seamless
+  frameBorder="0"
+  scrolling="no"
+  src="http://140.96.83.239:8088/superset/explore/table/17/?form_data=%7B%22datasource%22%3A%2217__table%22%2C%22viz_type%22%3A%22area%22%2C%22slice_id%22%3A41%2C%22granularity_sqla%22%3A%22pdate%22%2C%22time_grain_sqla%22%3A%22month%22%2C%22since%22%3A%22100%20years%20ago%22%2C%22until%22%3A%22now%22%2C%22metrics%22%3A%5B%22count%22%5D%2C%22groupby%22%3A%5B%22brand%22%5D%2C%22limit%22%3A50%2C%22timeseries_limit_metric%22%3Anull%2C%22show_brush%22%3Afalse%2C%22show_legend%22%3Atrue%2C%22rich_tooltip%22%3Atrue%2C%22y_axis_zero%22%3Afalse%2C%22y_log_scale%22%3Afalse%2C%22contribution%22%3Afalse%2C%22x_axis_format%22%3A%22smart_date%22%2C%22y_axis_format%22%3A%22.3s%22%2C%22x_axis_showminmax%22%3Atrue%2C%22show_controls%22%3Afalse%2C%22line_interpolation%22%3A%22linear%22%2C%22stacked_style%22%3A%22stream%22%2C%22rolling_type%22%3Anull%2C%22time_compare%22%3Anull%2C%22num_period_compare%22%3A%22%22%2C%22period_ratio_type%22%3A%22value%22%2C%22resample_how%22%3Anull%2C%22resample_rule%22%3Anull%2C%22resample_fillmethod%22%3Anull%2C%22where%22%3A%22%22%2C%22having%22%3A%22%22%2C%22filters%22%3A%5B%5D%7D&standalone=true&height=400"
+>
+</iframe>
+
+
+          </div>
+          <div class="chart-notes">
+            This is a sample text region to describe this chart.
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            Pageviews by browser (past 5 days)
+          </div>
+          <div class="chart-stage">
+
+<!--              <div id="chart-02"></div> -->
+
+          </div>
+          <div class="chart-notes">
+            Notes go down here
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="row">
+
+      <div class="col-sm-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            評論爬蟲
+          </div>
+          <div class="chart-stage">
+<iframe
+  width="350"
+  height="250"
+  seamless
+  frameBorder="0"
+  scrolling="no"
+  src="http://140.96.83.239:8088/superset/explore/table/24/?form_data=%7B%22datasource%22%3A%2224__table%22%2C%22viz_type%22%3A%22bar%22%2C%22slice_id%22%3A45%2C%22granularity_sqla%22%3A%22pdate%22%2C%22time_grain_sqla%22%3A%22day%22%2C%22since%22%3A%221%20year%20ago%22%2C%22until%22%3A%22now%22%2C%22metrics%22%3A%5B%22sum__cnt%22%5D%2C%22groupby%22%3A%5B%22pdate%22%5D%2C%22limit%22%3A50%2C%22timeseries_limit_metric%22%3Anull%2C%22show_brush%22%3Afalse%2C%22show_legend%22%3Atrue%2C%22show_bar_value%22%3Afalse%2C%22rich_tooltip%22%3Atrue%2C%22y_axis_zero%22%3Afalse%2C%22y_log_scale%22%3Afalse%2C%22contribution%22%3Afalse%2C%22x_axis_format%22%3A%22smart_date%22%2C%22y_axis_format%22%3A%22.3s%22%2C%22line_interpolation%22%3A%22linear%22%2C%22bar_stacked%22%3Afalse%2C%22x_axis_showminmax%22%3Atrue%2C%22bottom_margin%22%3A%22auto%22%2C%22x_axis_label%22%3A%22%22%2C%22y_axis_label%22%3A%22%22%2C%22reduce_x_ticks%22%3Afalse%2C%22show_controls%22%3Afalse%2C%22rolling_type%22%3A%22None%22%2C%22time_compare%22%3Anull%2C%22num_period_compare%22%3A%22%22%2C%22period_ratio_type%22%3A%22growth%22%2C%22resample_how%22%3Anull%2C%22resample_rule%22%3Anull%2C%22resample_fillmethod%22%3Anull%2C%22where%22%3A%22%22%2C%22having%22%3A%22%22%2C%22filters%22%3A%5B%5D%7D&standalone=true&height=250"
+>
+</iframe>
+
+
+          </div>
+          <div class="chart-notes">
+            Notes go down here
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            產品爬蟲
+          </div>
+          <div class="chart-stage">
+
+<iframe
+  width="350"
+  height="250"
+  seamless
+  frameBorder="0"
+  scrolling="no"
+  src="http://140.96.83.239:8088/superset/explore/table/25/?form_data=%7B%22datasource%22%3A%2225__table%22%2C%22viz_type%22%3A%22dist_bar%22%2C%22slice_id%22%3A46%2C%22granularity_sqla%22%3A%22pdate%22%2C%22time_grain_sqla%22%3A%22Time%20Column%22%2C%22since%22%3A%22100%20years%20ago%22%2C%22until%22%3A%22now%22%2C%22metrics%22%3A%5B%22sum__cnt%22%5D%2C%22groupby%22%3A%5B%22pdate%22%5D%2C%22columns%22%3A%5B%5D%2C%22row_limit%22%3Anull%2C%22show_legend%22%3Atrue%2C%22show_bar_value%22%3Afalse%2C%22bar_stacked%22%3Afalse%2C%22order_bars%22%3Afalse%2C%22y_axis_format%22%3A%22.3s%22%2C%22bottom_margin%22%3A%22auto%22%2C%22x_axis_label%22%3A%22%22%2C%22y_axis_label%22%3A%22%22%2C%22reduce_x_ticks%22%3Afalse%2C%22contribution%22%3Afalse%2C%22show_controls%22%3Afalse%2C%22where%22%3A%22%22%2C%22having%22%3A%22%22%2C%22filters%22%3A%5B%5D%7D&standalone=true&height=250"
+>
+</iframe>
+
+
+          </div>
+          <div class="chart-notes">
+            Notes go down here
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="chart-wrapper">
+          <div class="chart-title">
+            Impressions by country
+          </div>
+          <div class="chart-stage">
+            <div id="chart-05"></div>
+          </div>
+          <div class="chart-notes">
+            Notes go down here
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="chart-wrapper">
+          <img data-src="holder.js/100%x150/white">
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="chart-wrapper">
+          <img data-src="holder.js/100%x150/white">
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="chart-wrapper">
+          <img data-src="holder.js/100%x150/white">
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="chart-wrapper">
+          <img data-src="holder.js/100%x150/white">
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <p class="small text-muted">Built with &#9829; by <a href="https://keen.io">Keen IO</a></p>
+
+  </div>
+
+  <script type="text/javascript" src="/lib/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+  <script type="text/javascript" src="/lib/holderjs/holder.js"></script>
+  <script>
+    Holder.add_theme("white", { background:"#fff", foreground:"#a7a7a7", size:10 });
+  </script>
+
+  <script type="text/javascript" src="/lib/keen-js/dist/keen.min.js"></script>
+  <script type="text/javascript" src="/js/meta.js"></script>
+  <script type="text/javascript" src="keen.dashboard.js"></script>
+
+</body>
+</html>

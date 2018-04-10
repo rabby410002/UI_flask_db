@@ -1,0 +1,152 @@
+{% extends "layout2.html" %}
+
+
+{% block content %}
+
+    <script src="/vendor/jquery/jquery.min.js"></script>
+
+
+	<div id="example-table-simple"></div>
+
+	<div id="example"></div>
+
+<div id="myfirstchart" style="height: 250px;"></div>
+
+<div id="hmm" style="height: 250px;"></div>
+
+
+
+	<link rel="stylesheet" href="/jquery-ui.css">
+	<link rel="stylesheet" href="/tabulator.css">
+
+<script type="text/javascript" src="/jquery-ui.min.js"></script>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+
+	<script type="text/javascript" src="/tabulator.js"></script>
+
+
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+
+
+
+
+<script>
+$jQ = jQuery.noConflict();
+$jQ.getJSON( "/trend_brand_list2", function( data ) {
+  tabledata=data;
+
+		$jQ("#example-table-simple").tabulator({
+			height:"520px",
+			pagination:true,
+			data:tabledata,
+			columns:[
+			{title:"Brands", field:"brand", width:220},
+			{title:"Google Trend Tokens", field:"keyword", width:150},
+			],
+rowClick:function(e, id, dt, row){
+//				alert("Row " + tabledata[id]['bid'] + " Clicked!!!!")
+
+var bid=tabledata[id]['bid']
+
+$jQ.getJSON( "/gtrend2/"+bid, function( data ) {
+
+mygraph.setData(data);
+
+
+		});
+
+
+$jQ.getJSON( "/gtrend3/"+bid, function( data ) {
+
+	mygraph2.setData(data);
+
+
+			});
+
+
+
+			},
+		});
+
+		$(window).resize(function(){
+			$("#example-table-simple").tabulator("redraw");
+		});
+
+
+
+//  alert(data);
+});
+
+</script>
+
+
+
+
+
+<script>
+var mygraph;
+$jQ.getJSON( "/gtrend2/Citrine", function( data ) {
+
+mygraph=new Morris.Line({
+  // ID of the element in which to draw the chart.
+  element: 'myfirstchart',
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+data,  // The name of the data record attribute that contains x-values.
+  xkey: 'dt',
+  // A list of names of data record attributes that contain y-values.
+  ykeys: ['value'],
+  // Labels for the ykeys -- will be displayed when you hover over the
+  // chart.
+  labels: ['Value']
+});
+
+		});
+
+
+
+
+var mygraph;
+$jQ.getJSON( "/gtrend3/Citrine", function( data ) {
+
+mygraph2=new Morris.Line({
+  // ID of the element in which to draw the chart.
+  element: 'hmm',
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+data,  // The name of the data record attribute that contains x-values.
+  xkey: 'dt',
+  // A list of names of data record attributes that contain y-values.
+  ykeys: ['value'],
+  // Labels for the ykeys -- will be displayed when you hover over the
+  // chart.
+  labels: ['Value'],
+  lineColors: ['#555']
+});
+
+		});
+
+
+
+</script>
+
+
+
+
+{% endblock %}
+
+
+
+{% block jsblock %}
+
+
+
+{% endblock %}
+
+

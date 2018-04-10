@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+    <meta lastmodifieddate="2009-03-20">
+        <creator>Gexf.net</creator>
+        <description>A hello world! file</description>
+    </meta>
+    <graph mode="static" defaultedgetype="directed">
+        <nodes>
+
+{% for dict_item in nodes %}
+<node id="{{dict_item['id']}}" label="{{dict_item['label']}}"  />
+{% endfor %}
+        </nodes>
+        <edges>
+	  {% for dict_item in relations %}
+	  <edge source="{{dict_item['from']}}" target=" {{dict_item['to']}} " />
+	  {% endfor %}
+
+        </edges>
+    </graph>
+</gexf>

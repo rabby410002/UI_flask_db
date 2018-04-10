@@ -1,0 +1,360 @@
+{% extends "layout2.html" %}
+
+
+{% block content %}
+
+    <p><b><font size="6"> 品牌產品類型預測 </font></b></p>
+
+    <script src="/vendor/jquery/jquery.min.js"></script>
+
+	<div id="example-table"></div>
+
+	<div id="example"></div>
+
+	<div id="curve_chart" style="height: 500px"></div>
+
+	<div id="calendar_basic" style="height: 600px;margin:0px auto;"></div>
+
+        <div class='container' style="width: 100%;">
+	<div id="mynetwork"></div>
+	<style>#chart svg { height: 400px; }</style>
+	<div id="chart"> <svg></svg> </div>
+        </div>
+
+<style type="text/css">
+.container {
+    overflow: hidden;
+}
+#chart {
+    float: right;
+    width: 50%;
+}
+#mynetwork {
+    float: left;
+    width: 50%;
+}
+</style>
+
+<script>
+$jQ = jQuery.noConflict();
+$jQ.getJSON( "/pred_brand_list", function( data ) {
+	tabledata=data;
+	//alert("data : " + data);
+
+	$("#example-table").tabulator({
+		//height:"500px",
+		fitColumns:true,
+		pagination:true,
+		paginationSize:10,
+		data:tabledata,
+		columns:[
+		{title:"Brands", field:"brand", headerFilter:"input"},
+		{title:"Product Catecory", field:"prod", headerFilter:"input"},
+		],
+		rowClick:function(e, id, dt, row){
+		//alert("Row " + tabledata[id]['bid'] + " Clicked!!!!")
+
+			var bid = tabledata[id]['bid']
+			drawCurveTypes(bid);
+ 			drawChart(bid);
+			createNetwork(bid);
+                        $jQ.getJSON( "/pred_lead_comp/"+bid, function( data ) {
+                		chartData.datum(data).transition().duration(500).call(chart);
+	 			nv.utils.windowResize(chart.update);
+             		});
+		},
+	});
+
+	$(window).resize(function(){
+		$("#example-table-simple").tabulator("redraw");
+	});
+});
+
+</script>
+
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+function drawCurveTypes(bid = 1) {
+	$jQ.getJSON( "/pred_trend/" + bid, function( data ) {
+      var chartdata = new google.visualization.DataTable(data);
+
+	  var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+	        vAxis: {
+        	  title: 'Number of post'
+	        },
+		lineWidth: 2,
+	        series: {
+        	  0: {color: 'red'}
+        	}
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart'));
+      	googleline.draw(chartdata, options);
+      	
+      	$('td').remove();      	
+      	google.visualization.events.addListener(googleline, 'select', function () {
+      		var row = JSON.stringify(googleline.getSelection()[0]["row"]);
+      		var prod = JSON.stringify(chartdata.getColumnLabel(1));
+      		var date = JSON.stringify(chartdata.getFormattedValue(parseInt(row, 10),0));
+      	     	     		
+      		drawtable(prod,date);     		
+      	});
+	});
+}
+
+
+function drawtable(prod = '"蘭蔻 X 化妝水"',date = '"2016-01-10"') {
+	$jQ.getJSON( "/get_content_urcosme_date/"+ prod +','+ date, function( data ) {
+		
+		  alert(date +'  ,  '+ prod +'  ,  reviews :' + data.length)	
+	      var tr ;
+  		  var showChar = 30;
+		  var ellipsestext = "...";
+	      var moretext = "more";
+		  var lesstext = "less";
+		  
+		  $('td').remove(); 	  	  		  
+
+		  for (var i = 0; i < data.length; i++) {
+			 
+			var prodname = JSON.stringify(data[i].prodname).replace(/(^\"*)|(\"*$)/g, "");
+			var content = JSON.stringify(data[i].content).replace(/(^\"*)|(\"*$)/g, "");
+			var age = JSON.stringify(data[i].age).replace(/(^\"*)|(\"*$)/g, "");
+			var skin = JSON.stringify(data[i].skin).replace(/(^\"*)|(\"*$)/g, "")
+			var effects = JSON.stringify(data[i].effects).replace(/(^\"*)|(\"*$)/g, "");
+			var score = JSON.stringify(data[i].score).replace(/(^\"*)|(\"*$)/g, "");
+			
+	  	    tr = $('<tr/>');
+	  	    tr.append("<td style='background-color:lavender;' width='370px' >" + prodname + "</td>");
+	  	    tr.append("<td style='background-color:lavender; 'width='700px' >" + content + "</td>");
+	  	    tr.append("<td style='background-color:lavender;' width='60px' >" + age + "</td>");
+  	        tr.append("<td style='background-color:lavender; 'width='100px' >" + skin + "</td>");
+  	        tr.append("<td style='background-color:lavender;' width='250px' >" + effects + "</td>");
+  	        tr.append("<td style='background-color:lavender; 'width='20px' >" + score + "</td>");
+  	    
+	  	   $('#drawtable').first().append(tr);	 
+	  	  } 
+  	  
+	  		$('.more').each(function() { 			
+	  			$('td').each(function() {
+	  				var content = $(this).html();
+	  					    				
+	  				if(content.length > showChar) {	
+	  					var c = content.substr(0, showChar);
+	  					var h = content.substr(showChar, content.length - showChar);
+	  					var data = c + '<span class="moreelipses">'+ellipsestext+'</span><span class="morecontent"><span>' + h + '</span>&nbsp;&nbsp;<a href="" class="morelink">'+moretext+'</a></span>';
+	  					$(this).html(data);
+	  				}
+	  			});
+	  		});
+	  	
+	  		$(".morelink").click(function(){
+	  			if($(this).hasClass("less")) {
+	  				$(this).removeClass("less");
+	  				$(this).html(moretext);
+	  			} else {
+	  				$(this).addClass("less");
+	  				$(this).html(lesstext);
+	  			}
+	  			$(this).parent().prev().toggle();
+	  			$(this).prev().toggle();
+	  			return false;
+	  		}); 
+	});
+}
+
+
+</script>
+
+<!-- avon modified comment review -->
+<br><br><br><br>
+<style type="text/css">
+ 
+table.comment {
+	margin: 0px;
+	padding: 5px;
+	background: lightgray;
+	border: solid 1px #fff;
+	
+	width: 1500px;
+	height: 50px;
+	
+	margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+a.morelink {
+	text-decoration:none;
+	outline: none;
+}
+.morecontent span {
+	display: none;
+}
+</style>
+
+<font size="4" face="Courier New" >
+<table id='drawtable' class="comment more" border="1" cellpadding=0 cellspacing=0>
+  <tr>
+    <th width='370px'>Product Name</th>
+    <th width='700px'>Content</th> 
+    <th width='60px'>Age</th>
+    <th width='100px'>Skin</th>
+    <th width='250px'>Effects</th>
+    <th width='20px'>Score</th> 
+  </tr>
+</table>
+</font>
+
+<br><br><br><br>
+<!-- avon modified comment review end -->
+
+<script type="text/javascript">
+      google.charts.load("current", {packages:["calendar"]});
+      google.charts.setOnLoadCallback(drawChart);
+
+   function drawChart(bid = 1) {
+     $jQ.getJSON( "/pred_calendar/" + bid, function( data ) {
+       var dataTable = new google.visualization.arrayToDataTable(data);
+
+       var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
+
+       var options = {
+         title: "The number of posts for everday",
+	 width:"100%",
+         calendar: { cellSize: 20 },
+       };
+
+       chart.draw(dataTable, options);
+     });
+   }
+    </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script src="http://nvd3.org/assets/js/data/stream_layers.js"></script>
+<script>
+var chart;
+var chartData;
+
+  nv.addGraph(function() {
+	$jQ.getJSON( "/pred_lead_comp/1", function( data ) {
+  	chart = nv.models.lineWithFocusChart()
+	.x(function(d) {return d3.time.format("%Y-%m-%d").parse(d['date']);})
+	.y(function (d) { return d.value; });
+
+	//alert(data[0]['values'])
+	  chart.xAxis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+	  chart.x2Axis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+
+	  chart.yAxis.tickFormat(d3.format(',.2f'));
+
+	  chart.y2Axis.tickFormat(d3.format(',.2f'));
+
+	  chartData = d3.select('#chart svg').datum(data);
+	  chartData.transition().duration(500).call(chart);
+
+	  nv.utils.windowResize(chart.update);
+
+	});
+	  return chart;
+  });
+
+</script>
+
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+        #mynetwork {
+            width: 50%;
+            height: 600px;
+            border: 1px solid lightgray;
+        }
+</style>
+
+<script type="text/javascript">
+createNetwork();
+function createNetwork(bid = 1){
+  $jQ.getJSON( "/pred_leading/" + bid, function( data ) {
+    // create an array with nodes
+    var nodes = new vis.DataSet(data['node']);
+
+    // create an array with edges
+    var edges = new vis.DataSet(data['edge']);
+
+    var bid = data['bid']; 
+    //alert(bid) 
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {};
+
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
+
+    network.on("click", function(params){
+       //alert(params.edges);
+       if (params.nodes != ''){
+          //alert(nodes);
+          var bid_list = bid;
+          bid_list.split(',');
+          //alert(bid_list);
+          if (bid_list.indexOf(params.nodes) == -1){
+              node_id = bid + ',' + params.nodes;
+              createNetwork(node_id);
+          }
+       }
+       else{
+ 	     $jQ.getJSON( "/pred_lead_comp/"+params.edges, function( data ) {
+		chartData.datum(data).transition().duration(500).call(chart);
+	 	nv.utils.windowResize(chart.update);
+             });
+       }
+    });
+  });
+}
+</script>
+
+
+{% endblock %}
+
+
+{% block jsblock %}
+<link rel="stylesheet" href="/jquery-ui.css">
+<link rel="stylesheet" href="/tabulator.css">
+
+<script type="text/javascript" src="/jquery-ui.min.js"></script>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+<script type="text/javascript" src="/tabulator.js"></script>
+
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+
+
+{% endblock %}
+
+

@@ -1,0 +1,110 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<p><b><font size="6"> 數據收集情況 </font></b></p>
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<script type="text/javascript">
+function get_log() {
+    var data_xy = [];
+    var time = (new Date()).getTime();
+    $.ajaxSettings.async = false;
+    $.getJSON( "/data_log_old", function( data ) {
+            for (i = -19; i <= 0; i += 1) {
+                data_xy.push({
+                    x: time + i * 60000,
+                    y: parseInt(data[19+i])
+                });
+            }
+
+    });
+    return data_xy;
+};
+
+Highcharts.setOptions({
+    global: {
+        useUTC: false
+    }
+});
+
+Highcharts.chart('container', {
+    chart: {
+        type: 'spline',
+        animation: Highcharts.svg, // don't animate in old IE
+        marginRight: 10,
+        events: {
+            load: function () {
+
+                // set up the updating of the chart each second
+                var series = this.series[0];
+                setInterval(function () {
+                    var data = get_log();
+                    var x = (new Date()).getTime(), // current time
+                        y = data[19].y;
+                    //alert(y);
+                    series.addPoint([x, y], true, true);
+                }, 60000);
+            }
+        }
+    },
+    title: {
+        text: 'Live random data'
+    },
+    xAxis: {
+        type: 'datetime',
+        tickPixelInterval: 150
+    },
+    yAxis: {
+        title: {
+            text: 'Value'
+        },
+        plotLines: [{
+            value: 0,
+            width: 1,
+            color: '#808080'
+        }]
+    },
+    tooltip: {
+        formatter: function () {
+            return '<b>' + this.series.name + '</b><br/>' +
+                Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                Highcharts.numberFormat(this.y, 2);
+        }
+    },
+    legend: {
+        enabled: false
+    },
+    exporting: {
+        enabled: false
+    },
+    series: [{
+        name: 'Random data',
+        data: (function () {
+            var time = (new Date()).getTime(),
+                i;
+
+            console.log('test')
+            return get_log();
+        }())
+    }]
+});
+</script>
+<!--  eva modified end  --> 
+	
+{% endblock %}
+
+{% block jsblock %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+
+{% endblock %}

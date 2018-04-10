@@ -1,0 +1,86 @@
+{% extends "layout2.html" %}
+
+{% block content %}
+
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<p><b><font size="6"> google search times </font></b></p>
+
+<select id="Products" class="selectpicker"  title="Choose One Product" data-live-search="true">
+  <optgroup label="Products" > <!-- data-max-options="5" -->
+{% for p in prods %}
+    <option >{{p}}</option>
+{% endfor %}
+  </optgroup>
+</select>
+<button id="button">Select</button>
+
+<style>#chart svg { height: 400px; }</style>
+<div id="chart"> <svg></svg> </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script src="http://nvd3.org/assets/js/data/stream_layers.js"></script>
+
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script>
+$(document).ready(function(e) {
+	
+	$('.selectpicker').selectpicker(); 
+	
+    $('#button').click(function(){   
+	prod = $('#Products :selected').text()		
+        $.getJSON( "/google_trend/"+prod, function( data ) {
+		chartData.datum(data).transition().duration(500).call(chart);
+		nv.utils.windowResize(chart.update);
+
+	});
+	
+    });
+	
+});
+</script>
+	
+<script>
+var chart;
+var chartData;
+
+  nv.addGraph(function() {
+	$.getJSON( "/google_trend/太妃糖眼妝", function( data ) {
+  	chart = nv.models.lineWithFocusChart()
+	.x(function(d) {return d3.time.format("%Y-%m-%d").parse(d['date']);})
+	.y(function (d) { return d.value; });
+
+	//alert(data[0]['values'])
+	  chart.xAxis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+	  chart.x2Axis.tickFormat(function(d) { return d3.time.format('%Y %b %d')(new Date(d)) });
+
+	  chart.yAxis.tickFormat(d3.format(',.2f'));
+
+	  chart.y2Axis.tickFormat(d3.format(',.2f'));
+
+	  chartData = d3.select('#chart svg').datum(data);
+	  chartData.transition().duration(500).call(chart);
+
+	  nv.utils.windowResize(chart.update);
+
+	});
+	  return chart;
+  });
+
+</script>
+
+
+{% endblock %}
+
+{% block jsblock %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.3/js/bootstrap-select.min.js"></script>
+
+{% endblock %}

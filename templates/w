@@ -1,0 +1,222 @@
+{% extends "layout2.html" %}
+
+
+{% block content %}
+    <script src="/vendor/jquery/jquery.min.js"></script>
+
+	<div id="example-table-simple"></div>
+
+	<div id="example"></div>
+
+<style>
+
+#chart svg {
+  height: 400px;
+}
+
+</style>
+
+
+<div id="chart">
+  <svg></svg>
+</div>
+
+
+	<div id="myfirstchart" style="height: 250px;"></div>
+
+	<div id="chart_div"></div>
+
+	<div id="curve_chart" style="height: 500px"></div>
+
+<script>
+$jQ = jQuery.noConflict();
+$jQ.getJSON( "/ptt_brand_list", function( data ) {
+	tabledata=data;
+	//alert("data : " + data);
+
+	$("#example-table-simple").tabulator({
+		//height:"500px",
+		fitColumns:true,
+		pagination:true,
+		paginationSize:10,
+		data:tabledata,
+		columns:[
+		{title:"Brands", field:"brand", headerFilter:"input"},
+		{title:"Product Catecory", field:"prod", headerFilter:"input"},
+		],
+		rowClick:function(e, id, dt, row){
+		//alert("Row " + tabledata[id]['bid'] + " Clicked!!!!")
+
+			var bid=tabledata[id]['bid']
+
+			$jQ.getJSON( "/ptt_trend/"+bid, function( data ) {
+				mygraph.setData(data);
+			});
+			drawChart(bid);
+			drawCurveTypes(bid);
+
+		},
+	});
+
+	$(window).resize(function(){
+		$("#example-table-simple").tabulator("redraw");
+	});
+});
+
+</script>
+
+
+<script>
+var mygraph;
+$jQ.getJSON( "/ptt_trend/1", function( data ) {
+
+mygraph=new Morris.Line({
+  // ID of the element in which to draw the chart.
+	element: 'myfirstchart',
+	height:"400px",
+  // Chart data records -- each entry in this array corresponds to a point on
+  // the chart.
+	data,  // The name of the data record attribute that contains x-values.
+	xkey: 'dt',
+  // A list of names of data record attributes that contain y-values.
+	ykeys: ['value'],
+  // Labels for the ykeys -- will be displayed when you hover over the
+  // chart.
+	labels: ['Value'],
+	pointSize: 3,
+	lineColors:['#00DDDD']
+});
+
+		});
+
+
+</script>
+
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+var googlechart;
+google.charts.load('current', {'packages':['bar']});
+google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart(bid = 1) {
+	$jQ.getJSON( "/ptt_trend2/" + bid, function( data ) {
+        	var chartdata = google.visualization.arrayToDataTable(data);
+
+		//alert("data : " + chartdata);
+        var options = {
+          chart: {
+            title: 'PTT data source',
+            subtitle: 'Number of post: 2015-2017',
+          },
+          bars: 'vertical',
+          height: 400,
+          colors: ['#7570b3']
+        };
+
+        googlechart = new google.charts.Bar(document.getElementById('chart_div'));
+
+        googlechart.draw(chartdata, google.charts.Bar.convertOptions(options));
+	});
+
+      }
+
+</script>
+
+<script type="text/javascript">
+var googleline;
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawCurveTypes);
+
+      function drawCurveTypes(bid = 1) {
+	$jQ.getJSON( "/ptt_trend3/" + bid, function( data ) {
+        	var chartdata = new google.visualization.DataTable(data);
+
+	//alert("data : " + chartdata);
+	var options = {
+        	hAxis: {
+	          title: 'Date'
+        	},
+	        vAxis: {
+        	  title: 'Number of post'
+	        },
+	        series: {
+        	  1: {curveType: 'function'}
+        	}
+      	};
+
+      	googleline = new google.visualization.LineChart(document.getElementById('curve_chart'));
+      	googleline.draw(chartdata, options);
+	});
+
+      }
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.6/nv.d3.min.css"/>
+<script>
+nv.addGraph(function() {
+  var chart = nv.models.lineWithFocusChart();
+
+  chart.xAxis
+      .tickFormat(d3.format(',f'));
+
+  chart.yAxis
+      .tickFormat(d3.format(',.2f'));
+
+  chart.y2Axis
+      .tickFormat(d3.format(',.2f'));
+
+  d3.select('#chart svg')
+      .datum(testData())
+      .transition().duration(500)
+      .call(chart);
+
+  nv.utils.windowResize(chart.update);
+
+  return chart;
+});
+/**************************************
+ * Simple test data generator
+ */
+
+function testData() {
+  return stream_layers(3,128,.1).map(function(data, i) {
+    return { 
+      key: 'Stream' + i,
+      values: data
+    };
+  });
+}
+</script>
+{% endblock %}
+
+
+
+{% block jsblock %}
+	<link rel="stylesheet" href="/jquery-ui.css">
+	<link rel="stylesheet" href="/tabulator.css">
+
+<script type="text/javascript" src="/jquery-ui.min.js"></script>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+
+	<script type="text/javascript" src="/tabulator.js"></script>
+
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"></script>
+
+
+
+{% endblock %}
+
+

@@ -1,0 +1,105 @@
+{% extends "layout2.html" %}
+{% block content %}
+
+<p><b><font size="6"> 品牌產品類型偵測 </font></b></p>
+       <div class="panel panel-allarticle">
+        		<script type='text/javascript' src='https://public.tableau.com/javascripts/api/viz_v1.js'></script>
+			<div class='tableauPlaceholder' style='width: 2100px; height: 600px;'>
+				<object class='tableauViz' width='2050' height='377' style='display:none;'>
+				<param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
+		
+				<param name='site_root' value='' />
+				<param name='name' value='Demo_upload&#47;viz' />
+				<param name='tabs' value='no' />
+				<param name='toolbar' value='no' />
+				<param name='showVizHome' value='n' />
+				<param name='showShareOptions' value='false' />
+				<param name='display_count' value='yes' />
+				</object></div>
+        </div>
+<div class="container-fluid">
+	<div class="row">
+		<div class="panel panel-primary">
+			<div class="panel-heading">
+			</div>
+			<div class="panel-body">
+				<div>Urcosme 商品使用心得數量</div>
+				<div class="huge" style="font-size: 60px;" > {{ execsql('select count(*) from gsearch.urcosme_reviews') }}</div>
+				
+			</div>
+			<a href="/urcosme">
+				<div class="panel-footer" style="font-size: 20px;">
+					<span class="pull-left">UrCosme 品牌產品類型偵測</span>
+					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+				<div class="clearfix"></div>
+				</div>
+			</a>
+		</div>
+
+	
+		<div class="panel panel-danger">
+			<div class="panel-heading">
+			</div>
+			<div class="panel-body">
+				<div>PTT 商品使用心得數量</div>
+				<div class="huge" style="font-size: 60px;" > {{ execsql('select count(*) from gsearch.ptt_post ') }}</div>
+				
+			</div>
+			<a href="/ptt" style="color:#D9534F;">
+				<div class="panel-footer" style="font-size: 20px;">
+					<span class="pull-left">PTT 品牌產品類型偵測</span>
+					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+				<div class="clearfix"></div>
+				</div>
+			</a>
+		</div>
+			
+		<div class="panel panel-success">
+			<div class="panel-heading">
+			</div>
+			<div class="panel-body">
+				<div>Pixnet 商品使用心得數量</div>
+				<div class="huge" style="font-size: 60px;" > {{ execsql('select count(*) from Serena.pix_list2 ') }}</div>
+				
+			</div>
+			<a href="/pixnet_trends" style="color:#31af66;">
+				<div class="panel-footer" style="font-size: 20px;">
+					<span class="pull-left">Pixnet 品牌產品類型偵測</span>
+					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+				<div class="clearfix"></div>
+				</div>
+			</a>
+		</div>
+		
+		<div class="panel panel-warning">
+			<div class="panel-heading">
+			</div>
+			<div class="panel-body">
+				<div>商品使用心得總數量</div>
+				<div class="huge" style="font-size: 60px;" > {{ execsql('select sum(rows) as total_rows from (select count(*) as rows from gsearch.urcosme_reviews union all select count(*) as rows from gsearch.ptt_post union all select count(*) as rows from Serena.pix_list2 ) as u') }}</div>
+				
+			</div>
+			<a href="/pred" style="color:#d8800d;">
+				<div class="panel-footer" style="font-size: 20px;">
+					<span class="pull-left">品牌產品類型預測</span>
+					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+				<div class="clearfix"></div>
+				</div>
+			</a>
+			<a href="/bptrend" style="color:#d8800d;">
+				<div class="panel-footer" style="font-size: 20px;">
+					<span class="pull-left">品牌產品類型趨勢</span>
+					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+				<div class="clearfix"></div>
+				</div>
+			</a>
+		</div>
+		
+	</div>
+</div>
+
+{% endblock %}
+
+
+
+
